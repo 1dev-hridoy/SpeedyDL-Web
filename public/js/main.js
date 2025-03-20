@@ -165,8 +165,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function addDownloadButton(text, url, type) {
         const button = document.createElement('a');
         button.href = url;
-        button.target = '_blank';
         button.className = 'download-button';
+        
+        // Set download attribute to enable direct download
+        button.setAttribute('download', '');
         
         // Add appropriate icon based on type
         let icon = 'fa-download';
@@ -181,10 +183,76 @@ document.addEventListener('DOMContentLoaded', function() {
         button.innerHTML = `<i class="fas ${icon} download-button-icon"></i> ${text}`;
         videoButtons.appendChild(button);
         
-        // Track download click
-        button.addEventListener('click', function() {
+        // For videos and audio that might not download directly with the download attribute
+        button.addEventListener('click', function(e) {
+            // For some platforms, we need to handle the download manually
+            if (type === 'video' || type === 'audio') {
+                e.preventDefault();
+                downloadFile(url, generateFileName(type));
+            }
+            
+            // Track download
             trackDownload(url, type);
         });
+    }
+
+    // Function to generate a filename based on the content type and current timestamp
+    function generateFileName(type) {
+        const timestamp = new Date().getTime();
+        const platform = selectedPlatform;
+        
+        if (type === 'video') {
+            return `${platform}_video_${timestamp}.mp4`;
+        } else if (type === 'audio') {
+            return `${platform}_audio_${timestamp}.mp3`;
+        } else if (type === 'image') {
+            return `${platform}_image_${timestamp}.jpg`;
+        }
+        
+        return `download_${timestamp}`;
+    }
+
+    // Function to download a file using fetch
+    function downloadFile(url, fileName) {
+        showLoading();
+        showNotification('Starting download...', 'info');
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                hideLoading();
+                
+                // Create a temporary URL for the blob
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // Create a temporary link element
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                
+                // Append to the document, click it, and remove it
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Release the blob URL
+                window.URL.revokeObjectURL(blobUrl);
+                
+                showNotification('Download complete!', 'success');
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Download failed:', error);
+                
+                // Fallback to opening in new tab if download fails
+                showNotification('Direct download failed. Opening in new tab...', 'error');
+                window.open(url, '_blank');
+            });
     }
     
     function trackDownload(url, type) {
@@ -253,43 +321,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function renderRecentDownloads() {
-        if (recentDownloadsArray.length === 0) {
-            emptyState.classList.remove('hidden');
-            return;
-        }
-        
-        // Hide empty state
-        emptyState.classList.add('hidden');
-        
-        // Clear current list (except empty state)
-        const items = downloadsList.querySelectorAll('.download-item');
-        items.forEach(item => item.remove());
-        
-        // Add download items
-        recentDownloadsArray.forEach(item => {
-            const downloadItem = document.createElement('div');
-            downloadItem.className = 'download-item';
-            
-            const formattedDate = formatDate(new Date(item.timestamp));
-            
-            downloadItem.innerHTML = `
-                <img src="${item.thumbnail || '/placeholder.svg'}" alt="Thumbnail" class="download-item-thumbnail">
-                <div class="download-item-info">
-                    <div class="download-item-title">${item.title}</div>
-                    <div class="download-item-platform">
-                        <i class="fab fa-${item.platform}"></i> ${capitalizeFirstLetter(item.platform)} • ${formattedDate}
-                    </div>
-                </div>
-                <div class="download-item-action">
-                    <a href="${item.url}" target="_blank" class="download-button">
-                        <i class="fas fa-external-link-alt download-button-icon"></i>
-                    </a>
-                </div>
-            `;
-            
-            downloadsList.appendChild(downloadItem);
-        });
+    if (recentDownloadsArray.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
     }
+    
+    // Hide empty state
+    emptyState.classList.add('hidden');
+    
+    // Clear current list (except empty state)
+    const items = downloadsList.querySelectorAll('.download-item');
+    items.forEach(item => item.remove());
+    
+    // Add download items
+    recentDownloadsArray.forEach(item => {
+        const downloadItem = document.createElement('div');
+        downloadItem.className = 'download-item';
+        
+        const formattedDate = formatDate(new Date(item.timestamp));
+        
+        downloadItem.innerHTML = `
+            <div class="download-item-thumbnail-container">
+                <img src="${item.thumbnail || '/placeholder.svg'}" alt="Thumbnail" class="download-item-thumbnail">
+            </div>
+            <div class="download-item-info">
+                <div class="download-item-title">${item.title}</div>
+                <div class="download-item-platform">
+                    <i class="fab fa-${item.platform}"></i> ${capitalizeFirstLetter(item.platform)} • ${formattedDate}
+                </div>
+            </div>
+            <div class="download-item-action">
+                <a href="${item.url}" class="download-button" download>
+                    <i class="fas fa-download download-button-icon"></i>
+                </a>
+            </div>
+        `;
+        
+        // Add event listener to the download button
+        const downloadBtn = downloadItem.querySelector('.download-button');
+        downloadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            downloadFile(item.url, generateFileName('video'));
+        });
+        
+        downloadsList.appendChild(downloadItem);
+    });
+}
     
     function formatDate(date) {
         const now = new Date();
@@ -325,30 +402,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showNotification(message, type) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        // Add to body
-        document.body.appendChild(notification);
-        
-        // Show notification
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    // Set icon based on notification type
+    let icon = 'fa-info-circle';
+    if (type === 'success') {
+        icon = 'fa-check-circle';
+    } else if (type === 'error') {
+        icon = 'fa-exclamation-circle';
     }
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${icon}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
 });
