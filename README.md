@@ -119,7 +119,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you have any questions or feedback, please reach out to us at:
 
-- Facebook: [@hridoy.py](https://facebook.com/hidoy.py)
+- Facebook: [@hridoy.py](https://facebook.com/hridoy.py)
 
 ---
 
