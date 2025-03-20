@@ -11,13 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const recentDownloads = document.getElementById('recent-downloads');
     const downloadsList = document.getElementById('downloads-list');
     const emptyState = document.getElementById('empty-state');
+    const qualityRadios = document.querySelectorAll('input[name="quality"]');
     
     // State
     let selectedPlatform = 'youtube';
+    let selectedQuality = 'hd'; // Default to HD
     let recentDownloadsArray = JSON.parse(localStorage.getItem('recentDownloads')) || [];
     
     // Initialize
-    initializePlatformButtons();
     renderRecentDownloads();
     
     // Event Listeners
@@ -31,21 +32,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Functions
-    function initializePlatformButtons() {
-        // Set YouTube as default selected platform
-        platformBtns.forEach(btn => {
-            if (btn.dataset.platform === selectedPlatform) {
-                btn.classList.add('active');
+    qualityRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                selectedQuality = radio.value;
             }
         });
-    }
+    });
     
+    // Add Enter key support for the URL input
+    videoUrlInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleDownload();
+        }
+    });
+    
+    // Functions
     async function handleDownload() {
         const url = videoUrlInput.value.trim();
         
         if (!url) {
-            alert('Please enter a valid URL');
+            showNotification('Please enter a valid URL', 'error');
             return;
         }
         
@@ -61,9 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             displayVideoPreview(data);
             addToRecentDownloads(data, url);
+            showNotification('Video processed successfully!', 'success');
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to process the URL. Please try again.');
+            showNotification('Failed to process the URL. Please try again.', 'error');
         } finally {
             hideLoading();
         }
@@ -75,33 +83,39 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set thumbnail and title
         if (selectedPlatform === 'youtube') {
-            videoThumbnail.src = data.thumb || '';
+            videoThumbnail.src = data.thumb || '/placeholder.svg';
             videoTitle.textContent = data.title || 'YouTube Video';
             
-            // Add download buttons
-            if (data.video) {
-                addDownloadButton('Download SD', data.video, 'video');
-            }
-            if (data.video_hd) {
-                addDownloadButton('Download HD', data.video_hd, 'video');
-            }
-            if (data.audio) {
+            // Add download buttons based on selected quality
+            if (selectedQuality === 'sd' && data.video) {
+                addDownloadButton('Download SD Video', data.video, 'video');
+            } else if (selectedQuality === 'hd' && data.video_hd) {
+                addDownloadButton('Download HD Video', data.video_hd, 'video');
+            } else if (selectedQuality === 'audio' && data.audio) {
                 addDownloadButton('Download Audio', data.audio, 'audio');
+            } else {
+                // Fallback if selected quality is not available
+                if (data.video) addDownloadButton('Download SD Video', data.video, 'video');
+                if (data.video_hd) addDownloadButton('Download HD Video', data.video_hd, 'video');
+                if (data.audio) addDownloadButton('Download Audio', data.audio, 'audio');
             }
         } else if (selectedPlatform === 'facebook') {
-            videoThumbnail.src = data.thumbnail || '';
+            videoThumbnail.src = data.thumbnail || '/placeholder.svg';
             videoTitle.textContent = data.title || 'Facebook Video';
             
-            // Add download buttons
-            if (data.sd) {
-                addDownloadButton('Download SD', data.sd, 'video');
-            }
-            if (data.hd) {
-                addDownloadButton('Download HD', data.hd, 'video');
+            // Add download buttons based on selected quality
+            if (selectedQuality === 'sd' && data.sd) {
+                addDownloadButton('Download SD Video', data.sd, 'video');
+            } else if (selectedQuality === 'hd' && data.hd) {
+                addDownloadButton('Download HD Video', data.hd, 'video');
+            } else {
+                // Fallback
+                if (data.sd) addDownloadButton('Download SD Video', data.sd, 'video');
+                if (data.hd) addDownloadButton('Download HD Video', data.hd, 'video');
             }
         } else if (selectedPlatform === 'instagram') {
             if (data.thumb && data.thumb.length > 0) {
-                videoThumbnail.src = data.thumb[0] || '';
+                videoThumbnail.src = data.thumb[0] || '/placeholder.svg';
             }
             videoTitle.textContent = 'Instagram Media';
             
@@ -115,31 +129,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } else if (selectedPlatform === 'tiktok') {
-            videoThumbnail.src = data.thumbnail || '';
-            videoTitle.textContent = data.title || 'TikTok Video';
+            videoThumbnail.src = data.thumbnail || '/placeholder.svg';
+            videoTitle.textContent = 'TikTok Video';
             
-            // Add download buttons
-            if (data.video) {
-                addDownloadButton('Download Video', data.video, 'video');
-            }
-            if (data.audio) {
+            // Add download buttons based on selected quality
+            if (selectedQuality === 'audio' && data.audio) {
                 addDownloadButton('Download Audio', data.audio, 'audio');
+            } else {
+                if (data.video) addDownloadButton('Download Video', data.video, 'video');
+                if (data.audio) addDownloadButton('Download Audio', data.audio, 'audio');
             }
         } else if (selectedPlatform === 'twitter') {
-            videoThumbnail.src = data.thumbnail || '';
+            videoThumbnail.src = data.thumbnail || '/placeholder.svg';
             videoTitle.textContent = 'Twitter Video';
             
-            // Add download buttons
-            if (data.SD) {
-                addDownloadButton('Download SD', data.SD, 'video');
-            }
-            if (data.HD) {
-                addDownloadButton('Download HD', data.HD, 'video');
+            // Add download buttons based on selected quality
+            if (selectedQuality === 'sd' && data.SD) {
+                addDownloadButton('Download SD Video', data.SD, 'video');
+            } else if (selectedQuality === 'hd' && data.HD) {
+                addDownloadButton('Download HD Video', data.HD, 'video');
+            } else {
+                // Fallback
+                if (data.SD) addDownloadButton('Download SD Video', data.SD, 'video');
+                if (data.HD) addDownloadButton('Download HD Video', data.HD, 'video');
             }
         }
         
         // Show video preview section
         videoPreview.classList.remove('hidden');
+        
+        // Scroll to video preview
+        videoPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     
     function addDownloadButton(text, url, type) {
@@ -158,8 +178,18 @@ document.addEventListener('DOMContentLoaded', function() {
             icon = 'fa-image';
         }
         
-        button.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
+        button.innerHTML = `<i class="fas ${icon} download-button-icon"></i> ${text}`;
         videoButtons.appendChild(button);
+        
+        // Track download click
+        button.addEventListener('click', function() {
+            trackDownload(url, type);
+        });
+    }
+    
+    function trackDownload(url, type) {
+        // You could implement analytics here
+        console.log(`Download clicked: ${type} - ${url}`);
     }
     
     function addToRecentDownloads(data, originalUrl) {
@@ -240,21 +270,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const downloadItem = document.createElement('div');
             downloadItem.className = 'download-item';
             
+            const formattedDate = formatDate(new Date(item.timestamp));
+            
             downloadItem.innerHTML = `
-                <img src="${item.thumbnail || '/placeholder.svg'}" alt="Thumbnail">
+                <img src="${item.thumbnail || '/placeholder.svg'}" alt="Thumbnail" class="download-item-thumbnail">
                 <div class="download-item-info">
                     <div class="download-item-title">${item.title}</div>
                     <div class="download-item-platform">
-                        <i class="fab fa-${item.platform}"></i> ${capitalizeFirstLetter(item.platform)}
+                        <i class="fab fa-${item.platform}"></i> ${capitalizeFirstLetter(item.platform)} • ${formattedDate}
                     </div>
                 </div>
-                <a href="${item.url}" target="_blank" class="download-button">
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
+                <div class="download-item-action">
+                    <a href="${item.url}" target="_blank" class="download-button">
+                        <i class="fas fa-external-link-alt download-button-icon"></i>
+                    </a>
+                </div>
             `;
             
             downloadsList.appendChild(downloadItem);
         });
+    }
+    
+    function formatDate(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHour = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHour / 24);
+        
+        if (diffSec < 60) {
+            return 'just now';
+        } else if (diffMin < 60) {
+            return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+        } else if (diffHour < 24) {
+            return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
+        } else if (diffDay < 7) {
+            return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+        } else {
+            return date.toLocaleDateString();
+        }
     }
     
     function capitalizeFirstLetter(string) {
@@ -267,5 +322,33 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function hideLoading() {
         loadingOverlay.classList.add('hidden');
+    }
+    
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
     }
 });

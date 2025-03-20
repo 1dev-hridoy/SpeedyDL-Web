@@ -4,147 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader</title>
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body>
+    <div class="container">
         <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-dark mb-2">Video Downloader</h1>
-            <p class="text-gray-600">Download videos from YouTube, Facebook, Instagram, and more</p>
+        <header class="text-center">
+            <h1 class="title">Video Downloader</h1>
+            <p class="subtitle">Download videos from YouTube, Facebook, Instagram, and more</p>
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-3xl mx-auto">
+        <main>
             <!-- Download Form -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <div class="mb-6">
-                    <label for="video-url" class="block text-sm font-medium text-gray-700 mb-2">Video URL</label>
-                    <div class="flex">
+            <div class="card">
+                <div class="form-group">
+                    <label for="video-url" class="form-label">Video URL</label>
+                    <div class="input-group">
                         <input 
                             type="text" 
                             id="video-url" 
-                            placeholder="Paste your video link here..." 
-                            class="flex-1 block w-full rounded-l-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-4 border"
+                            class="form-input"
+                            placeholder="https://www.youtube.com/watch?v=EuTQUrqMlxk" 
                         >
-                        <button id="download-btn" class="bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-r-lg transition duration-300">
-                            <i class="fas fa-download mr-2"></i> Download
+                        <button id="download-btn" class="btn btn-primary">
+                            <i class="fas fa-download btn-icon"></i> Download
                         </button>
                     </div>
                 </div>
 
                 <!-- Platform Selection -->
-                <div class="mb-6">
-                    <p class="block text-sm font-medium text-gray-700 mb-3">Select Platform</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="platform-btn flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" data-platform="youtube">
-                            <i class="fab fa-youtube text-red-600 text-2xl mr-2"></i>
-                            <span>YouTube</span>
+                <div class="form-group">
+                    <label class="form-label">Select Platform</label>
+                    <div class="platform-options">
+                        <div class="platform-btn platform-youtube active" data-platform="youtube">
+                            <i class="fab fa-youtube platform-icon"></i>
+                            <span class="platform-name">YouTube</span>
                         </div>
-                        <div class="platform-btn flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" data-platform="facebook">
-                            <i class="fab fa-facebook text-blue-600 text-2xl mr-2"></i>
-                            <span>Facebook</span>
+                        <div class="platform-btn platform-facebook" data-platform="facebook">
+                            <i class="fab fa-facebook platform-icon"></i>
+                            <span class="platform-name">Facebook</span>
                         </div>
-                        <div class="platform-btn flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" data-platform="instagram">
-                            <i class="fab fa-instagram text-pink-600 text-2xl mr-2"></i>
-                            <span>Instagram</span>
+                        <div class="platform-btn platform-instagram" data-platform="instagram">
+                            <i class="fab fa-instagram platform-icon"></i>
+                            <span class="platform-name">Instagram</span>
                         </div>
-                        <div class="platform-btn flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" data-platform="tiktok">
-                            <i class="fab fa-tiktok text-black text-2xl mr-2"></i>
-                            <span>TikTok</span>
+                        <div class="platform-btn platform-tiktok" data-platform="tiktok">
+                            <i class="fab fa-tiktok platform-icon"></i>
+                            <span class="platform-name">TikTok</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Quality Options -->
-                <div>
-                    <p class="block text-sm font-medium text-gray-700 mb-3">Quality Options</p>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="inline-flex items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quality" value="sd" class="h-4 w-4 text-primary focus:ring-primary" checked>
-                            <span class="ml-2">SD</span>
-                        </label>
-                        <label class="inline-flex items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quality" value="hd" class="h-4 w-4 text-primary focus:ring-primary">
-                            <span class="ml-2">HD</span>
-                        </label>
-                        <label class="inline-flex items-center p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="quality" value="audio" class="h-4 w-4 text-primary focus:ring-primary">
-                            <span class="ml-2">Audio Only</span>
-                        </label>
+                <div class="form-group">
+                    <label class="form-label">Quality Options</label>
+                    <div class="quality-options">
+                        <div class="quality-option">
+                            <input type="radio" id="quality-sd" name="quality" value="sd" class="quality-radio">
+                            <label for="quality-sd" class="quality-label">
+                                <span class="quality-radio-icon"></span>
+                                SD
+                            </label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="quality-hd" name="quality" value="hd" class="quality-radio" checked>
+                            <label for="quality-hd" class="quality-label">
+                                <span class="quality-radio-icon"></span>
+                                HD
+                            </label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="quality-audio" name="quality" value="audio" class="quality-radio">
+                            <label for="quality-audio" class="quality-label">
+                                <span class="quality-radio-icon"></span>
+                                Audio Only
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Video Preview Section -->
-            <div id="video-preview" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
-                <h2 class="text-xl font-semibold mb-4">Video Preview</h2>
-                <div class="flex flex-col items-center">
-                    <div id="thumbnail-container" class="mb-4 w-full max-w-lg">
-                        <img id="video-thumbnail" src="/placeholder.svg" alt="Video Thumbnail" class="w-full h-auto rounded-lg">
-                    </div>
-                    <h3 id="video-title" class="text-lg font-medium mb-2"></h3>
-                    <div id="video-buttons" class="flex flex-wrap gap-3 justify-center mt-4">
-                        <!-- Download buttons will be added here dynamically -->
-                    </div>
+            <div id="video-preview" class="card video-preview hidden">
+                <h2 class="section-title">Video Preview</h2>
+                <div class="thumbnail-container">
+                    <img id="video-thumbnail" src="/placeholder.svg" alt="Video Thumbnail" class="video-thumbnail">
+                </div>
+                <h3 id="video-title" class="video-title"></h3>
+                <div id="video-buttons" class="video-buttons">
+                    <!-- Download buttons will be added here dynamically -->
                 </div>
             </div>
 
             <!-- Recent Downloads -->
-            <div id="recent-downloads" class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold mb-4">Recent Downloads</h2>
-                <div id="downloads-list" class="space-y-4">
+            <div id="recent-downloads" class="card">
+                <h2 class="section-title">Recent Downloads</h2>
+                <div id="downloads-list" class="downloads-list">
                     <!-- Empty State -->
-                    <div id="empty-state" class="text-center py-8">
-                        <i class="fas fa-history text-gray-300 text-5xl mb-3"></i>
-                        <p class="text-gray-500">Your download history will appear here</p>
+                    <div id="empty-state" class="empty-state">
+                        <i class="fas fa-history empty-icon"></i>
+                        <p class="empty-text">Your download history will appear here</p>
                     </div>
                 </div>
             </div>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works">
+                <h2 class="section-title text-center">How It Works</h2>
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-icon-container">
+                            <i class="fas fa-link step-icon"></i>
+                        </div>
+                        <h3 class="step-title">Paste URL</h3>
+                        <p class="step-description">Copy and paste the video link from any supported platform</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-container">
+                            <i class="fas fa-cog step-icon"></i>
+                        </div>
+                        <h3 class="step-title">Select Options</h3>
+                        <p class="step-description">Choose your preferred video quality and format</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-container">
+                            <i class="fas fa-download step-icon"></i>
+                        </div>
+                        <h3 class="step-title">Download</h3>
+                        <p class="step-description">Click download and save the video to your device</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>© 2025 Video Downloader. All rights reserved.</p>
+                <p>This tool is for educational purposes only. Please respect copyright laws.</p>
+            </footer>
         </main>
-
-        <!-- How It Works Section -->
-        <section class="max-w-4xl mx-auto mt-16">
-            <h2 class="text-2xl font-bold text-center mb-8">How It Works</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-link text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="font-semibold mb-2">Paste URL</h3>
-                    <p class="text-gray-600">Copy and paste the video link from any supported platform</p>
-                </div>
-                <div class="text-center">
-                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-cog text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="font-semibold mb-2">Select Options</h3>
-                    <p class="text-gray-600">Choose your preferred video quality and format</p>
-                </div>
-                <div class="text-center">
-                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-download text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="font-semibold mb-2">Download</h3>
-                    <p class="text-gray-600">Click download and save the video to your device</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="mt-16 text-center text-gray-500 text-sm">
-            <p>© 2025 Video Downloader. All rights reserved.</p>
-            <p class="mt-2">This tool is for educational purposes only. Please respect copyright laws.</p>
-        </footer>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p class="text-lg font-medium">Processing your request...</p>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Processing your request...</p>
         </div>
     </div>
 
